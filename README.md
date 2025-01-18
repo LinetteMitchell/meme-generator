@@ -35,30 +35,34 @@ You can view the live version of the project here: [Meme Generator](https://meme
 
 To run this project locally:
 
-\`\`\`bash
 # Clone the repository
+```ruby
 git clone https://github.com/yourusername/meme-generator.git
 cd meme-generator
+```
 
 # Install dependencies
+```ruby
 npm install
+```
 
 # Create a .env file and add your OpenAI API key
+```ruby
 echo "OPENAI_API_KEY=your_openai_api_key" > .env
+```
 
 # Start the server
+```ruby
 node server.js
-\`\`\`
+```
 
 Once the server is running, open your browser and navigate to:
-
-\`\`\`plaintext
+```plaintext
 http://localhost:5000
-\`\`\`
+```
 
 ## Directory Structure
-
-\`\`\`plaintext
+```
 meme-generator/
 ├── public/
 │   ├── index.html    # Main HTML file
@@ -68,7 +72,7 @@ meme-generator/
 ├── server.js         # Backend server
 ├── .env              # Environment variables (API keys, etc.)
 └── README.md         # Project documentation
-\`\`\`
+```
 
 ## API Integration
 
@@ -79,7 +83,8 @@ This project integrates OpenAI's GPT-3.5 for caption generation:
 
 Example API usage in server.js:
 
-\`\`\`javascript
+javascript
+```ruby
 const response = await axios.post(
     'https://api.openai.com/v1/chat/completions',
     {
@@ -98,13 +103,14 @@ const response = await axios.post(
         }
     }
 );
-\`\`\`
+```
 
 ## Example JavaScript Functionality
 
 Example of dynamically resizing the image to fit within 350x350 dimensions:
 
-\`\`\`javascript
+javascript
+```ruby
 const maxWidth = 350; // Maximum width for the image
 const maxHeight = 350; // Maximum height for the image
 const scaleFactor = Math.min(maxWidth / img.width, maxHeight / img.height, 1); // Scale proportionally
@@ -112,7 +118,7 @@ const scaleFactor = Math.min(maxWidth / img.width, maxHeight / img.height, 1); /
 canvas.width = img.width * scaleFactor;
 canvas.height = img.height * scaleFactor;
 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-\`\`\`
+```
 
 ## Contributing
 

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meme Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        #canvas {
+            margin-top: 20px;
+            border: 1px solid #ccc;
+        }
+        #caption {
+            margin-top: 10px;
+            font-size: 1.2em;
+            color: #333;
+        }
+        button {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Meme Generator</h1>
+    <form id="memeForm" enctype="multipart/form-data">
+        <label for="image">Upload Image:</label><br>
+        <input type="file" name="image" accept="image/*" required><br><br>
+
+        <label for="description">Describe the Image:</label><br>
+        <input type="text" name="description" placeholder="e.g., A funny dog picture" required><br><br>
+
+        <button type="submit">Generate Meme</button>
+    </form>
+
+    <canvas id="canvas"></canvas>
+    <div id="caption"></div>
+    <button id="downloadButton" style="display: none;">Download Meme</button>
+
+    <script>
+        const form = document.getElementById('memeForm');
+        const canvas = document.getElementById('canvas');
+        const captionDiv = document.getElementById('caption');
+        const downloadButton = document.getElementById('downloadButton');
+        const ctx = canvas.getContext('2d');
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                console.log(`Server response:`, data);
+
+                if (data.error) {
+                    captionDiv.innerHTML = `<p style="color: red;">Error: ${data.error}</p>`;
+                } else {
+                    const memeText = data.memeText || "No caption generated!";
+                    captionDiv.innerText = memeText; // Display caption below the canvas
+
+                    const img = new Image();
+                    img.src = `/${data.filePath}`;
+                    img.onload = () => {
+                        const maxWidth = 600; // Canvas width limit
+                        const scaleFactor = Math.min(maxWidth / img.width, 1);
+                        const canvasWidth = img.width * scaleFactor;
+                        const canvasHeight = img.height * scaleFactor + 100; // Extra space for caption
+
+                        canvas.width = canvasWidth;
+                        canvas.height = canvasHeight;
+
+                        // Draw the image
+                        ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight - 100);
+
+                        // Draw the caption on the canvas
+                        ctx.font = '20px Arial';
+                        ctx.fillStyle = 'white';
+                        ctx.textAlign = 'center';
+                        wrapText(ctx, memeText, canvasWidth / 2, canvasHeight - 80, canvasWidth - 40, 24);
+
+                        // Show the download button
+                        downloadButton.style.display = 'block';
+
+                        // Download meme functionality
+                        downloadButton.onclick = () => {
+                            const link = document.createElement('a');
+                            link.download = 'generated-meme.png';
+                            link.href = canvas.toDataURL();
+                            link.click();
+                        };
+                    };
+                }
+            } catch (error) {
+                console.error(`Error:`, error);
+                captionDiv.innerHTML = `<p style="color: red;">Error: Could not generate meme.</p>`;
+            }
+        });
+
+        // Function to wrap text on the canvas
+        function wrapText(context, text, x, y, maxWidth, lineHeight) {
+            const words = text.split(' ');
+            let line = '';
+
+            for (let n = 0; n < words.length; n++) {
+                const testLine = line + words[n] + ' ';
+                const metrics = context.measureText(testLine);
+                const testWidth = metrics.width;
+
+                if (testWidth > maxWidth && n > 0) {
+                    context.fillText(line, x, y);
+                    line = words[n] + ' ';
+                    y += lineHeight;
+                } else {
+                    line = testLine;
+                }
+            }
+            context.fillText(line, x, y);
+        }
+    </script>
+</body>
+</html>
